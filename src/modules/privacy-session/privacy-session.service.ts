@@ -17,6 +17,7 @@ function publicSession(session: PrivacySessionRecord) {
     resumePosition: Math.min(completedQuestions + 1, session.questionCount),
     score: session.score,
     mistakes: session.mistakes,
+    tutorialRequired: session.tutorialCompletedAt === null,
     questions: session.sessionQuestions.map((sessionQuestion) => ({
       id: sessionQuestion.question.id,
       position: sessionQuestion.position,
@@ -30,7 +31,20 @@ function publicSession(session: PrivacySessionRecord) {
 }
 
 export class PrivacySessionService {
+  private readonly terminalListeners = new Set<(publicId: string) => void>();
+
   public constructor(private readonly repository: PrivacySessionRepository) {}
+
+  public subscribeTerminal(listener: (publicId: string) => void): () => void {
+    this.terminalListeners.add(listener);
+    return () => this.terminalListeners.delete(listener);
+  }
+
+  private publishTerminal(publicId: string): void {
+    setImmediate(() => {
+      for (const listener of this.terminalListeners) listener(publicId);
+    });
+  }
 
   public async start(userId: string) {
     const result = await this.repository.start(userId);
@@ -43,6 +57,14 @@ export class PrivacySessionService {
   public async getActive(userId: string, publicId: string) {
     const session = await this.repository.findActiveByPublicId(publicId, userId);
     return session ? publicSession(session) : null;
+  }
+
+  public async completeTutorial(userId: string, sessionId: string, completedAt: Date) {
+    const result = await this.repository.completeTutorial(userId, sessionId, completedAt);
+    if (result.kind === 'not_found') {
+      throw new AppError(404, 'privacy_session_not_found', 'Privacy session was not found.');
+    }
+    return { id: result.id, tutorialRequired: false as const };
   }
 
   public async answer(
@@ -76,7 +98,7 @@ export class PrivacySessionService {
       throw new AppError(409, 'privacy_answer_conflict', 'Privacy answer could not be saved.');
     }
 
-    return {
+    const response = {
       correct: result.answer.correct,
       explanation: result.answer.explanation,
       feedback: result.answer.correctFeedback,
@@ -89,6 +111,8 @@ export class PrivacySessionService {
         mistakes: result.answer.mistakes,
       },
     };
+    if (response.session.status !== 'ACTIVE') this.publishTerminal(response.session.publicId);
+    return response;
   }
 
   public async abandon(userId: string, sessionId: string) {

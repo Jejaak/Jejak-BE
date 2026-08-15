@@ -54,8 +54,10 @@ export function attachPrivacySessionGateway(input: {
   }
 
   function closeSession(publicId: string): void {
-    for (const socket of clients.get(publicId) ?? []) socket.close(1000, 'Session completed');
+    for (const socket of clients.get(publicId) ?? []) socket.close(1000, 'Session ended');
   }
+
+  const unsubscribeTerminal = input.service.subscribeTerminal(closeSession);
 
   const handleUpgrade = (request: IncomingMessage, socket: Duplex, head: Buffer): void => {
     void (async () => {
@@ -118,7 +120,7 @@ export function attachPrivacySessionGateway(input: {
               requestId: parsed.data.requestId,
               data: result,
             });
-            if (result.session.status === 'COMPLETED') closeSession(publicId);
+            if (result.session.status !== 'ACTIVE') closeSession(publicId);
           }).catch(() => {
             send(liveSocket, {
               type: 'privacy.answer.error',
@@ -150,6 +152,7 @@ export function attachPrivacySessionGateway(input: {
 
   return () => {
     input.server.off('upgrade', handleUpgrade);
+    unsubscribeTerminal();
     clearInterval(heartbeat);
     queues.clear();
     for (const socket of websocketServer.clients) socket.close(1001, 'Server shutting down');

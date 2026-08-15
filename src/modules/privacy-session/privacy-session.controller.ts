@@ -34,6 +34,11 @@ export class PrivacySessionController {
     res.status(200).json({ data: session });
   };
 
+  public readonly completeTutorial: RequestHandler = async (req, res) => {
+    const sessionId = privacySessionIdSchema.parse(req.params.sessionId);
+    res.status(200).json({ data: await this.service.completeTutorial(userId(req), sessionId, this.now()) });
+  };
+
   public readonly answer: RequestHandler = async (req, res) => {
     const sessionId = privacySessionIdSchema.parse(req.params.sessionId);
     const input = privacyAnswerSchema.parse(req.body);

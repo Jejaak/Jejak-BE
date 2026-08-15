@@ -10,6 +10,11 @@ export function createPrivacySessionRouter(
   router.post('/privacy-sessions', requireMutationOrigin, asyncHandler(controller.start));
   router.get('/privacy-sessions/public/:publicId', asyncHandler(controller.getActive));
   router.post(
+    '/privacy-sessions/:sessionId/tutorial-completed',
+    requireMutationOrigin,
+    asyncHandler(controller.completeTutorial),
+  );
+  router.post(
     '/privacy-sessions/:sessionId/answers',
     requireMutationOrigin,
     asyncHandler(controller.answer),

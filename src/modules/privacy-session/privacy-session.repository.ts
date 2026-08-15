@@ -36,6 +36,7 @@ export interface PrivacySessionRecord {
   readonly mistakes: number;
   readonly startedAt: Date;
   readonly completedAt: Date | null;
+  readonly tutorialCompletedAt: Date | null;
   readonly sessionQuestions: PrivacySessionQuestionRecord[];
 }
 
@@ -81,6 +82,10 @@ export type AnswerPrivacySessionResult =
   | { readonly kind: 'idempotency_conflict' }
   | { readonly kind: 'answer_conflict' };
 
+export type CompletePrivacyTutorialResult =
+  | { readonly kind: 'success'; readonly id: string }
+  | { readonly kind: 'not_found' };
+
 export type AbandonPrivacySessionResult =
   | { readonly kind: 'success'; readonly session: PrivacySessionRecord }
   | { readonly kind: 'not_found' }
@@ -89,6 +94,7 @@ export type AbandonPrivacySessionResult =
 export interface PrivacySessionRepository {
   start(userId: string): Promise<StartPrivacySessionResult>;
   findActiveByPublicId(publicId: string, userId: string): Promise<PrivacySessionRecord | null>;
+  completeTutorial(userId: string, sessionId: string, completedAt: Date): Promise<CompletePrivacyTutorialResult>;
   answer(input: {
     userId: string;
     sessionId: string;
@@ -211,6 +217,32 @@ export class PrismaPrivacySessionRepository implements PrivacySessionRepository 
     });
   }
 
+  public async completeTutorial(
+    userId: string,
+    sessionId: string,
+    completedAt: Date,
+  ): Promise<CompletePrivacyTutorialResult> {
+    const sessions = await this.prisma.$queryRaw<{ readonly id: string }[]>(Prisma.sql`
+      UPDATE "TrGameSession"
+      SET
+        "tutorialCompletedAt" = COALESCE("tutorialCompletedAt", CAST(${completedAt} AS timestamp(3))),
+        "updatedAt" = CASE
+          WHEN "tutorialCompletedAt" IS NULL THEN CAST(${completedAt} AS timestamp(3))
+          ELSE "updatedAt"
+        END
+      WHERE "id" = CAST(${sessionId} AS uuid)
+        AND "userId" = ${userId}
+        AND "mode" = 'PRIVACY'::"GameMode"
+        AND (
+          "status" = 'ACTIVE'::"GameSessionStatus"
+          OR "tutorialCompletedAt" IS NOT NULL
+        )
+      RETURNING "id"
+    `);
+    const session = sessions[0];
+    return session ? { kind: 'success', id: session.id } : { kind: 'not_found' };
+  }
+
   public async answer(input: {
     userId: string;
     sessionId: string;
@@ -297,12 +329,16 @@ export class PrismaPrivacySessionRepository implements PrivacySessionRepository 
           "score" = session."score" + CASE WHEN saved_answer."correct" THEN 1 ELSE 0 END,
           "mistakes" = session."mistakes" + CASE WHEN saved_answer."correct" THEN 0 ELSE 1 END,
           "status" = CASE
+            WHEN session."mistakes" + CASE WHEN saved_answer."correct" THEN 0 ELSE 1 END >= 3
+              THEN 'LOST'::"GameSessionStatus"
             WHEN saved_answer."answeredCount" = session."questionCount"
               THEN 'COMPLETED'::"GameSessionStatus"
             ELSE 'ACTIVE'::"GameSessionStatus"
           END,
           "completedAt" = CASE
-            WHEN saved_answer."answeredCount" = session."questionCount" THEN CAST(${input.answeredAt} AS timestamp(3))
+            WHEN session."mistakes" + CASE WHEN saved_answer."correct" THEN 0 ELSE 1 END >= 3
+              OR saved_answer."answeredCount" = session."questionCount"
+              THEN CAST(${input.answeredAt} AS timestamp(3))
             ELSE NULL::timestamp(3)
           END,
           "updatedAt" = CAST(${input.answeredAt} AS timestamp(3))
@@ -447,7 +483,7 @@ export class PrismaPrivacySessionRepository implements PrivacySessionRepository 
         answer: {
           sessionId: state.sessionId,
           publicId: state.publicId,
-          status: state.replayPosition === state.questionCount ? 'COMPLETED' : 'ACTIVE',
+          status: state.status,
           answeredCount: state.replayAnsweredCount,
           score: state.replayScore,
           mistakes: state.replayMistakes,
@@ -472,7 +508,9 @@ export class PrismaPrivacySessionRepository implements PrivacySessionRepository 
             include: sessionInclude,
           });
           if (!session) return { kind: 'not_found' as const };
-          if (session.status === 'ABANDONED') return { kind: 'success' as const, session };
+          if (session.status === 'ABANDONED' || session.status === 'LOST') {
+            return { kind: 'success' as const, session };
+          }
           if (session.status === 'COMPLETED') return { kind: 'completed' as const };
 
           await transaction.trGameSession.delete({ where: { id: session.id } });
