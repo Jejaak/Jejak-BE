@@ -1,14 +1,15 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
-import type { Env } from '../config/env.js';
+import { frontendOrigins, type Env } from '../config/env.js';
 import type { PrismaClient } from '../generated/prisma/client.js';
 
 export function createAuth(prisma: PrismaClient, env: Env) {
+  const secure = new URL(env.BETTER_AUTH_URL).protocol === 'https:';
   return betterAuth({
     appName: 'Jejak',
     baseURL: env.BETTER_AUTH_URL,
     secret: env.BETTER_AUTH_SECRET,
-    trustedOrigins: [env.FRONTEND_ORIGIN],
+    trustedOrigins: [...frontendOrigins(env)],
     database: prismaAdapter(prisma, {
       provider: 'postgresql',
       transaction: true,
@@ -23,11 +24,12 @@ export function createAuth(prisma: PrismaClient, env: Env) {
       updateAge: 24 * 60 * 60,
     },
     advanced: {
-      useSecureCookies: env.NODE_ENV === 'production',
+      useSecureCookies: secure,
+      trustedProxyHeaders: env.TRUST_PROXY_HOPS > 0,
       defaultCookieAttributes: {
         httpOnly: true,
-        secure: env.NODE_ENV === 'production',
-        sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+        secure,
+        sameSite: secure ? 'none' : 'lax',
         path: '/',
       },
     },
