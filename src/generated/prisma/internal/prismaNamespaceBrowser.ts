@@ -293,6 +293,7 @@ export const TrGameSessionScalarFieldEnum = {
   mistakes: 'mistakes',
   startedAt: 'startedAt',
   completedAt: 'completedAt',
+  tutorialCompletedAt: 'tutorialCompletedAt',
   updatedAt: 'updatedAt'
 } as const
 

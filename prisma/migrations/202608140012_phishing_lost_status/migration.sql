@@ -1,0 +1,1 @@
+ALTER TYPE "GameSessionStatus" ADD VALUE IF NOT EXISTS 'LOST';

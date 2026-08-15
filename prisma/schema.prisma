@@ -33,6 +33,7 @@ enum PrivacyChoice {
 enum GameSessionStatus {
   ACTIVE
   COMPLETED
+  LOST
   ABANDONED
 }
 
@@ -270,6 +271,7 @@ model TrGameSession {
   mistakes         Int                        @default(0)
   startedAt        DateTime                   @default(now())
   completedAt      DateTime?
+  tutorialCompletedAt DateTime?
   updatedAt        DateTime                   @updatedAt
   sessionQuestions TrPrivacySessionQuestion[]
 

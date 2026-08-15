@@ -49,6 +49,7 @@ export type TrGameSessionMinAggregateOutputType = {
   mistakes: number | null
   startedAt: Date | null
   completedAt: Date | null
+  tutorialCompletedAt: Date | null
   updatedAt: Date | null
 }
 
@@ -63,6 +64,7 @@ export type TrGameSessionMaxAggregateOutputType = {
   mistakes: number | null
   startedAt: Date | null
   completedAt: Date | null
+  tutorialCompletedAt: Date | null
   updatedAt: Date | null
 }
 
@@ -77,6 +79,7 @@ export type TrGameSessionCountAggregateOutputType = {
   mistakes: number
   startedAt: number
   completedAt: number
+  tutorialCompletedAt: number
   updatedAt: number
   _all: number
 }
@@ -105,6 +108,7 @@ export type TrGameSessionMinAggregateInputType = {
   mistakes?: true
   startedAt?: true
   completedAt?: true
+  tutorialCompletedAt?: true
   updatedAt?: true
 }
 
@@ -119,6 +123,7 @@ export type TrGameSessionMaxAggregateInputType = {
   mistakes?: true
   startedAt?: true
   completedAt?: true
+  tutorialCompletedAt?: true
   updatedAt?: true
 }
 
@@ -133,6 +138,7 @@ export type TrGameSessionCountAggregateInputType = {
   mistakes?: true
   startedAt?: true
   completedAt?: true
+  tutorialCompletedAt?: true
   updatedAt?: true
   _all?: true
 }
@@ -234,6 +240,7 @@ export type TrGameSessionGroupByOutputType = {
   mistakes: number
   startedAt: Date
   completedAt: Date | null
+  tutorialCompletedAt: Date | null
   updatedAt: Date
   _count: TrGameSessionCountAggregateOutputType | null
   _avg: TrGameSessionAvgAggregateOutputType | null
@@ -271,6 +278,7 @@ export type TrGameSessionWhereInput = {
   mistakes?: Prisma.IntFilter<"TrGameSession"> | number
   startedAt?: Prisma.DateTimeFilter<"TrGameSession"> | Date | string
   completedAt?: Prisma.DateTimeNullableFilter<"TrGameSession"> | Date | string | null
+  tutorialCompletedAt?: Prisma.DateTimeNullableFilter<"TrGameSession"> | Date | string | null
   updatedAt?: Prisma.DateTimeFilter<"TrGameSession"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   sessionQuestions?: Prisma.TrPrivacySessionQuestionListRelationFilter
@@ -287,6 +295,7 @@ export type TrGameSessionOrderByWithRelationInput = {
   mistakes?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  tutorialCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   sessionQuestions?: Prisma.TrPrivacySessionQuestionOrderByRelationAggregateInput
@@ -306,6 +315,7 @@ export type TrGameSessionWhereUniqueInput = Prisma.AtLeast<{
   mistakes?: Prisma.IntFilter<"TrGameSession"> | number
   startedAt?: Prisma.DateTimeFilter<"TrGameSession"> | Date | string
   completedAt?: Prisma.DateTimeNullableFilter<"TrGameSession"> | Date | string | null
+  tutorialCompletedAt?: Prisma.DateTimeNullableFilter<"TrGameSession"> | Date | string | null
   updatedAt?: Prisma.DateTimeFilter<"TrGameSession"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   sessionQuestions?: Prisma.TrPrivacySessionQuestionListRelationFilter
@@ -322,6 +332,7 @@ export type TrGameSessionOrderByWithAggregationInput = {
   mistakes?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  tutorialCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.TrGameSessionCountOrderByAggregateInput
   _avg?: Prisma.TrGameSessionAvgOrderByAggregateInput
@@ -344,6 +355,7 @@ export type TrGameSessionScalarWhereWithAggregatesInput = {
   mistakes?: Prisma.IntWithAggregatesFilter<"TrGameSession"> | number
   startedAt?: Prisma.DateTimeWithAggregatesFilter<"TrGameSession"> | Date | string
   completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TrGameSession"> | Date | string | null
+  tutorialCompletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TrGameSession"> | Date | string | null
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"TrGameSession"> | Date | string
 }
 
@@ -357,6 +369,7 @@ export type TrGameSessionCreateInput = {
   mistakes?: number
   startedAt?: Date | string
   completedAt?: Date | string | null
+  tutorialCompletedAt?: Date | string | null
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutGameSessionsInput
   sessionQuestions?: Prisma.TrPrivacySessionQuestionCreateNestedManyWithoutSessionInput
@@ -373,6 +386,7 @@ export type TrGameSessionUncheckedCreateInput = {
   mistakes?: number
   startedAt?: Date | string
   completedAt?: Date | string | null
+  tutorialCompletedAt?: Date | string | null
   updatedAt?: Date | string
   sessionQuestions?: Prisma.TrPrivacySessionQuestionUncheckedCreateNestedManyWithoutSessionInput
 }
@@ -387,6 +401,7 @@ export type TrGameSessionUpdateInput = {
   mistakes?: Prisma.IntFieldUpdateOperationsInput | number
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tutorialCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutGameSessionsNestedInput
   sessionQuestions?: Prisma.TrPrivacySessionQuestionUpdateManyWithoutSessionNestedInput
@@ -403,6 +418,7 @@ export type TrGameSessionUncheckedUpdateInput = {
   mistakes?: Prisma.IntFieldUpdateOperationsInput | number
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tutorialCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionQuestions?: Prisma.TrPrivacySessionQuestionUncheckedUpdateManyWithoutSessionNestedInput
 }
@@ -418,6 +434,7 @@ export type TrGameSessionCreateManyInput = {
   mistakes?: number
   startedAt?: Date | string
   completedAt?: Date | string | null
+  tutorialCompletedAt?: Date | string | null
   updatedAt?: Date | string
 }
 
@@ -431,6 +448,7 @@ export type TrGameSessionUpdateManyMutationInput = {
   mistakes?: Prisma.IntFieldUpdateOperationsInput | number
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tutorialCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -445,6 +463,7 @@ export type TrGameSessionUncheckedUpdateManyInput = {
   mistakes?: Prisma.IntFieldUpdateOperationsInput | number
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tutorialCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -469,6 +488,7 @@ export type TrGameSessionCountOrderByAggregateInput = {
   mistakes?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  tutorialCompletedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -489,6 +509,7 @@ export type TrGameSessionMaxOrderByAggregateInput = {
   mistakes?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  tutorialCompletedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -503,6 +524,7 @@ export type TrGameSessionMinOrderByAggregateInput = {
   mistakes?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  tutorialCompletedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -583,6 +605,7 @@ export type TrGameSessionCreateWithoutUserInput = {
   mistakes?: number
   startedAt?: Date | string
   completedAt?: Date | string | null
+  tutorialCompletedAt?: Date | string | null
   updatedAt?: Date | string
   sessionQuestions?: Prisma.TrPrivacySessionQuestionCreateNestedManyWithoutSessionInput
 }
@@ -597,6 +620,7 @@ export type TrGameSessionUncheckedCreateWithoutUserInput = {
   mistakes?: number
   startedAt?: Date | string
   completedAt?: Date | string | null
+  tutorialCompletedAt?: Date | string | null
   updatedAt?: Date | string
   sessionQuestions?: Prisma.TrPrivacySessionQuestionUncheckedCreateNestedManyWithoutSessionInput
 }
@@ -641,6 +665,7 @@ export type TrGameSessionScalarWhereInput = {
   mistakes?: Prisma.IntFilter<"TrGameSession"> | number
   startedAt?: Prisma.DateTimeFilter<"TrGameSession"> | Date | string
   completedAt?: Prisma.DateTimeNullableFilter<"TrGameSession"> | Date | string | null
+  tutorialCompletedAt?: Prisma.DateTimeNullableFilter<"TrGameSession"> | Date | string | null
   updatedAt?: Prisma.DateTimeFilter<"TrGameSession"> | Date | string
 }
 
@@ -654,6 +679,7 @@ export type TrGameSessionCreateWithoutSessionQuestionsInput = {
   mistakes?: number
   startedAt?: Date | string
   completedAt?: Date | string | null
+  tutorialCompletedAt?: Date | string | null
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutGameSessionsInput
 }
@@ -669,6 +695,7 @@ export type TrGameSessionUncheckedCreateWithoutSessionQuestionsInput = {
   mistakes?: number
   startedAt?: Date | string
   completedAt?: Date | string | null
+  tutorialCompletedAt?: Date | string | null
   updatedAt?: Date | string
 }
 
@@ -698,6 +725,7 @@ export type TrGameSessionUpdateWithoutSessionQuestionsInput = {
   mistakes?: Prisma.IntFieldUpdateOperationsInput | number
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tutorialCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutGameSessionsNestedInput
 }
@@ -713,6 +741,7 @@ export type TrGameSessionUncheckedUpdateWithoutSessionQuestionsInput = {
   mistakes?: Prisma.IntFieldUpdateOperationsInput | number
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tutorialCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -726,6 +755,7 @@ export type TrGameSessionCreateManyUserInput = {
   mistakes?: number
   startedAt?: Date | string
   completedAt?: Date | string | null
+  tutorialCompletedAt?: Date | string | null
   updatedAt?: Date | string
 }
 
@@ -739,6 +769,7 @@ export type TrGameSessionUpdateWithoutUserInput = {
   mistakes?: Prisma.IntFieldUpdateOperationsInput | number
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tutorialCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionQuestions?: Prisma.TrPrivacySessionQuestionUpdateManyWithoutSessionNestedInput
 }
@@ -753,6 +784,7 @@ export type TrGameSessionUncheckedUpdateWithoutUserInput = {
   mistakes?: Prisma.IntFieldUpdateOperationsInput | number
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tutorialCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionQuestions?: Prisma.TrPrivacySessionQuestionUncheckedUpdateManyWithoutSessionNestedInput
 }
@@ -767,6 +799,7 @@ export type TrGameSessionUncheckedUpdateManyWithoutUserInput = {
   mistakes?: Prisma.IntFieldUpdateOperationsInput | number
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tutorialCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -812,6 +845,7 @@ export type TrGameSessionSelect<ExtArgs extends runtime.Types.Extensions.Interna
   mistakes?: boolean
   startedAt?: boolean
   completedAt?: boolean
+  tutorialCompletedAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   sessionQuestions?: boolean | Prisma.TrGameSession$sessionQuestionsArgs<ExtArgs>
@@ -829,6 +863,7 @@ export type TrGameSessionSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   mistakes?: boolean
   startedAt?: boolean
   completedAt?: boolean
+  tutorialCompletedAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["trGameSession"]>
@@ -844,6 +879,7 @@ export type TrGameSessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   mistakes?: boolean
   startedAt?: boolean
   completedAt?: boolean
+  tutorialCompletedAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["trGameSession"]>
@@ -859,10 +895,11 @@ export type TrGameSessionSelectScalar = {
   mistakes?: boolean
   startedAt?: boolean
   completedAt?: boolean
+  tutorialCompletedAt?: boolean
   updatedAt?: boolean
 }
 
-export type TrGameSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "publicId" | "userId" | "mode" | "status" | "questionCount" | "score" | "mistakes" | "startedAt" | "completedAt" | "updatedAt", ExtArgs["result"]["trGameSession"]>
+export type TrGameSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "publicId" | "userId" | "mode" | "status" | "questionCount" | "score" | "mistakes" | "startedAt" | "completedAt" | "tutorialCompletedAt" | "updatedAt", ExtArgs["result"]["trGameSession"]>
 export type TrGameSessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   sessionQuestions?: boolean | Prisma.TrGameSession$sessionQuestionsArgs<ExtArgs>
@@ -892,6 +929,7 @@ export type $TrGameSessionPayload<ExtArgs extends runtime.Types.Extensions.Inter
     mistakes: number
     startedAt: Date
     completedAt: Date | null
+    tutorialCompletedAt: Date | null
     updatedAt: Date
   }, ExtArgs["result"]["trGameSession"]>
   composites: {}
@@ -1328,6 +1366,7 @@ export interface TrGameSessionFieldRefs {
   readonly mistakes: Prisma.FieldRef<"TrGameSession", 'Int'>
   readonly startedAt: Prisma.FieldRef<"TrGameSession", 'DateTime'>
   readonly completedAt: Prisma.FieldRef<"TrGameSession", 'DateTime'>
+  readonly tutorialCompletedAt: Prisma.FieldRef<"TrGameSession", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"TrGameSession", 'DateTime'>
 }
     

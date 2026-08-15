@@ -47,6 +47,7 @@ export type PrivacyChoice = (typeof PrivacyChoice)[keyof typeof PrivacyChoice]
 export const GameSessionStatus = {
   ACTIVE: 'ACTIVE',
   COMPLETED: 'COMPLETED',
+  LOST: 'LOST',
   ABANDONED: 'ABANDONED'
 } as const
 
