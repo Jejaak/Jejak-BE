@@ -1,0 +1,296 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum GameMode {
+  PRIVACY
+  PHISHING
+  DOWNLOADS
+}
+
+enum VirusSessionStatus {
+  ACTIVE
+  WON
+  LOST
+  ABANDONED
+}
+
+enum VirusFileAction {
+  ALLOW
+  BLOCK
+}
+
+enum PrivacyChoice {
+  SHARE
+  REJECT
+}
+
+enum GameSessionStatus {
+  ACTIVE
+  COMPLETED
+  ABANDONED
+}
+
+model User {
+  id            String         @id
+  name          String
+  email         String         @unique
+  emailVerified Boolean        @default(false)
+  image         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  gameProgress     GameProgress[]
+  phishingAnswers  TrPhishingAnswer[]
+  phishingSessions TrPhishingSession[]
+  virusSessions    TrVirusSession[]
+  gameSessions    TrGameSession[]
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@index([expiresAt])
+}
+
+model GameProgress {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  idempotencyKey String   @db.VarChar(128)
+  mode           GameMode
+  score          Int
+  maxScore       Int
+  mistakes       Int
+  durationMs     Int
+  completedAt    DateTime
+  createdAt      DateTime @default(now())
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId, completedAt(sort: Desc)])
+  @@index([userId, mode, completedAt(sort: Desc)])
+}
+
+model MsPhishingQuestion {
+  id             String             @id @db.VarChar(64)
+  sequence       Int                @unique
+  senderName     String             @db.VarChar(100)
+  senderEmail    String             @db.VarChar(254)
+  senderAsset    String             @db.VarChar(255)
+  subject        String             @db.VarChar(160)
+  preview        String             @db.VarChar(200)
+  greeting       String             @db.VarChar(120)
+  body           String             @db.Text
+  action         String             @db.VarChar(255)
+  attachmentName String?            @db.VarChar(180)
+  attachmentAsset String?           @db.VarChar(255)
+  suspicious      Boolean
+  explanation     String             @db.Text
+  clues           Json
+  isActive       Boolean            @default(true)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  answers          TrPhishingAnswer[]
+  sessionQuestions TrPhishingSessionQuestion[]
+
+  @@index([isActive, sequence])
+}
+
+model TrPhishingSession {
+  id               String                      @id @default(uuid()) @db.Uuid
+  publicId         String                      @unique @db.VarChar(32)
+  userId           String
+  user             User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status           GameSessionStatus           @default(ACTIVE)
+  answeredCount    Int                         @default(0)
+  score            Int                         @default(0)
+  startedAt        DateTime                    @default(now())
+  completedAt      DateTime?
+  updatedAt        DateTime                    @updatedAt
+  sessionQuestions TrPhishingSessionQuestion[]
+  answers          TrPhishingAnswer[]
+
+  @@index([userId, startedAt(sort: Desc)])
+  @@index([userId, status, startedAt(sort: Desc)])
+}
+
+model TrPhishingSessionQuestion {
+  id         String             @id @default(uuid()) @db.Uuid
+  sessionId  String             @db.Uuid
+  session    TrPhishingSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  questionId String             @db.VarChar(64)
+  question   MsPhishingQuestion @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  position   Int
+
+  @@unique([sessionId, position])
+  @@unique([sessionId, questionId])
+  @@index([questionId])
+}
+
+model TrPhishingAnswer {
+  id               String             @id @default(uuid()) @db.Uuid
+  sessionId        String?            @db.Uuid
+  session          TrPhishingSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId       String             @db.VarChar(64)
+  question         MsPhishingQuestion @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  idempotencyKey   String             @db.VarChar(128)
+  selectedClueIds  String[]
+  markedSuspicious Boolean
+  correct          Boolean
+  answeredAt       DateTime           @default(now())
+
+  @@unique([userId, idempotencyKey])
+  @@unique([sessionId, questionId])
+  @@index([userId, answeredAt(sort: Desc)])
+  @@index([questionId])
+}
+
+model MsVirusFile {
+  id          String                @id @db.VarChar(64)
+  name        String                @unique @db.VarChar(180)
+  suspicious  Boolean
+  asset       String                @db.VarChar(255)
+  isActive    Boolean               @default(true)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  sessionFiles TrVirusSessionFile[]
+
+  @@index([isActive, suspicious])
+}
+
+model TrVirusSession {
+  id            String                @id @default(uuid()) @db.Uuid
+  publicId      String                @unique @db.VarChar(32)
+  userId        String
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status        VirusSessionStatus    @default(ACTIVE)
+  safeCount     Int                   @default(0)
+  mistakes      Int                   @default(0)
+  startedAt     DateTime              @default(now())
+  completedAt   DateTime?
+  updatedAt     DateTime              @updatedAt
+  sessionFiles  TrVirusSessionFile[]
+
+  @@index([userId, startedAt(sort: Desc)])
+}
+
+model TrVirusSessionFile {
+  id          String            @id @default(uuid()) @db.Uuid
+  sessionId   String            @db.Uuid
+  session     TrVirusSession    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  fileId      String            @db.VarChar(64)
+  file        MsVirusFile       @relation(fields: [fileId], references: [id], onDelete: Restrict)
+  position    Int
+  action      VirusFileAction?
+  correct     Boolean?
+  resolvedAt  DateTime?
+
+  @@unique([sessionId, position])
+  @@unique([sessionId, fileId])
+  @@index([fileId])
+}
+
+model MsPrivacyQuestion {
+  id               String                     @id @db.VarChar(64)
+  sequence         Int                        @unique
+  characterName    String                     @db.VarChar(100)
+  characterAsset   String                     @db.VarChar(255)
+  accountAge       String                     @db.VarChar(60)
+  relationship     String                     @db.VarChar(160)
+  prompt           String                     @db.Text
+  explanation      String                     @db.Text
+  correctFeedback  String                     @db.Text
+  correctChoice    PrivacyChoice
+  isActive         Boolean                    @default(true)
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @updatedAt
+  sessionQuestions TrPrivacySessionQuestion[]
+
+  @@index([isActive, sequence])
+}
+
+model TrGameSession {
+  id               String                     @id @default(uuid()) @db.Uuid
+  publicId         String                     @unique @db.VarChar(32)
+  userId           String
+  user             User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mode             GameMode
+  status           GameSessionStatus          @default(ACTIVE)
+  questionCount    Int                        @default(15)
+  score            Int                        @default(0)
+  mistakes         Int                        @default(0)
+  startedAt        DateTime                   @default(now())
+  completedAt      DateTime?
+  updatedAt        DateTime                   @updatedAt
+  sessionQuestions TrPrivacySessionQuestion[]
+
+  @@index([userId, mode, startedAt(sort: Desc)])
+  @@index([userId, status])
+}
+
+model TrPrivacySessionQuestion {
+  id             String            @id @default(uuid()) @db.Uuid
+  sessionId      String            @db.Uuid
+  session        TrGameSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  questionId     String            @db.VarChar(64)
+  question       MsPrivacyQuestion @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  position       Int
+  selectedChoice PrivacyChoice?
+  correct        Boolean?
+  idempotencyKey String?           @db.VarChar(128)
+  answeredAt     DateTime?
+
+  @@unique([sessionId, position])
+  @@unique([sessionId, questionId])
+  @@unique([sessionId, idempotencyKey])
+  @@index([questionId])
+}
