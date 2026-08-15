@@ -172,14 +172,14 @@ export class PrismaPhishingRepository implements PhishingRepository {
 
   public findSessionByPublicId(publicId: string, userId: string): Promise<PhishingSessionRecord | null> {
     return this.prisma.trPhishingSession.findFirst({
-      where: { publicId, userId, status: { in: ['ACTIVE', 'COMPLETED'] } },
+      where: { publicId, userId, status: { in: ['ACTIVE', 'COMPLETED', 'LOST'] } },
       include: sessionInclude,
     });
   }
 
   public async findAnswerContext(publicId: string, userId: string, questionId: string): Promise<PhishingAnswerContext | null> {
     const session = await this.prisma.trPhishingSession.findFirst({
-      where: { publicId, userId, status: { in: ['ACTIVE', 'COMPLETED'] } },
+      where: { publicId, userId, status: { in: ['ACTIVE', 'COMPLETED', 'LOST'] } },
       select: {
         id: true,
         publicId: true,
@@ -240,18 +240,20 @@ export class PrismaPhishingRepository implements PhishingRepository {
       const answer = await transaction.trPhishingAnswer.create({ data: input });
       const answeredCount = activeSession.answeredCount + 1;
       const score = activeSession.score + Number(input.correct);
-      const completed = answeredCount >= 15;
+      const mistakes = answeredCount - score;
+      const status: GameSessionStatus = mistakes >= 3 ? 'LOST' : answeredCount >= 15 ? 'COMPLETED' : 'ACTIVE';
+      const terminal = status !== 'ACTIVE';
       const session = await transaction.trPhishingSession.update({
         where: { id: input.sessionId },
         data: {
           answeredCount,
           score,
-          status: completed ? 'COMPLETED' : 'ACTIVE',
-          completedAt: completed ? input.answeredAt : null,
+          status,
+          completedAt: terminal ? input.answeredAt : null,
           updatedAt: input.answeredAt,
         },
       });
-      if (completed) {
+      if (terminal) {
         await transaction.gameProgress.upsert({
           where: {
             userId_idempotencyKey: {
@@ -265,7 +267,7 @@ export class PrismaPhishingRepository implements PhishingRepository {
             mode: 'PHISHING',
             score,
             maxScore: 15,
-            mistakes: answeredCount - score,
+            mistakes,
             durationMs: Math.max(1, Math.min(86_400_000, input.answeredAt.getTime() - activeSession.startedAt.getTime())),
             completedAt: input.answeredAt,
           },

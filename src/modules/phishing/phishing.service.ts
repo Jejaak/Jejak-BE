@@ -97,7 +97,11 @@ export class PhishingService {
       answeredAt,
     });
     const payload = {
-      type: saved.status === 'COMPLETED' ? 'phishing.session.completed' as const : 'phishing.answer.saved' as const,
+      type: saved.status === 'LOST'
+        ? 'phishing.session.lost' as const
+        : saved.status === 'COMPLETED'
+          ? 'phishing.session.completed' as const
+          : 'phishing.answer.saved' as const,
       sessionId: context.publicId,
       questionId: saved.answer.questionId,
       selectedClueIds: saved.answer.selectedClueIds,
