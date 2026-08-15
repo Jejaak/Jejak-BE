@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import { createApp } from './app.js';
 import { createAuth } from './auth/auth.js';
 import { createAuthHandler } from './auth/handler.js';
-import { byteSize, parseEnv } from './config/env.js';
+import { byteSize, frontendOrigins, parseEnv } from './config/env.js';
 import { getPrisma } from './db/prisma.js';
 import { PhishingEvents } from './modules/phishing/phishing.events.js';
 import { PrismaPhishingRepository } from './modules/phishing/phishing.repository.js';
@@ -19,6 +19,7 @@ import { VirusSessionService } from './modules/virus-session/virus-session.servi
 const env = parseEnv(process.env);
 const prisma = getPrisma(env);
 const auth = createAuth(prisma, env);
+const allowedFrontendOrigins = frontendOrigins(env);
 const phishingEvents = new PhishingEvents();
 const phishingRepository = new PrismaPhishingRepository(prisma);
 const phishingService = new PhishingService(phishingRepository, phishingEvents);
@@ -28,7 +29,7 @@ const virusSessionRepository = new PrismaVirusSessionRepository(prisma);
 const virusSessionService = new VirusSessionService(virusSessionRepository);
 const app = createApp({
   config: {
-    frontendOrigin: env.FRONTEND_ORIGIN,
+    frontendOrigins: allowedFrontendOrigins,
     trustProxyHops: env.TRUST_PROXY_HOPS,
     jsonBodyLimit: env.JSON_BODY_LIMIT,
     apiRateLimitMax: env.API_RATE_LIMIT_MAX,
@@ -50,7 +51,7 @@ const server = createServer(app);
 const phishingWebSocket = attachPhishingWebSocket({
   server,
   auth,
-  frontendOrigin: env.FRONTEND_ORIGIN,
+  frontendOrigins: allowedFrontendOrigins,
   repository: phishingRepository,
   service: phishingService,
   events: phishingEvents,
@@ -60,14 +61,14 @@ const closePrivacySessionGateway = attachPrivacySessionGateway({
   server,
   auth,
   service: privacySessionService,
-  frontendOrigin: env.FRONTEND_ORIGIN,
+  frontendOrigins: allowedFrontendOrigins,
   now: () => new Date(),
 });
 const closeVirusSessionGateway = attachVirusSessionGateway({
   server,
   auth,
   service: virusSessionService,
-  frontendOrigin: env.FRONTEND_ORIGIN,
+  frontendOrigins: allowedFrontendOrigins,
   now: () => new Date(),
 });
 server.listen(env.PORT, env.HOST);

@@ -30,6 +30,7 @@ const rawEnvSchema = z.object({
   BETTER_AUTH_SECRET: z.string().min(32),
   BETTER_AUTH_URL: originSchema.default('http://localhost:3000'),
   FRONTEND_ORIGIN: originSchema.default('http://localhost:5173'),
+  FRONTEND_ORIGINS: z.string().optional(),
   JSON_BODY_LIMIT: z.string().regex(/^\d+(?:b|kb|mb)$/iu).default('16kb'),
   API_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(120),
   API_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60_000),
@@ -38,6 +39,12 @@ const rawEnvSchema = z.object({
 });
 
 export type Env = Readonly<z.infer<typeof rawEnvSchema>>;
+
+export function frontendOrigins(env: Pick<Env, 'FRONTEND_ORIGIN' | 'FRONTEND_ORIGINS'>): readonly string[] {
+  const configured = env.FRONTEND_ORIGINS?.split(',').map((value) => value.trim()).filter(Boolean) ?? [];
+  const origins = [env.FRONTEND_ORIGIN, ...configured].map((value) => originSchema.parse(value));
+  return [...new Set(origins)];
+}
 
 export function byteSize(value: string): number {
   const match = /^(\d+)(b|kb|mb)$/iu.exec(value);
@@ -53,8 +60,8 @@ export function parseEnv(source: NodeJS.ProcessEnv | Record<string, string>): En
     if (new URL(parsed.BETTER_AUTH_URL).protocol !== 'https:') {
       throw new Error('BETTER_AUTH_URL must use HTTPS in production');
     }
-    if (new URL(parsed.FRONTEND_ORIGIN).protocol !== 'https:') {
-      throw new Error('FRONTEND_ORIGIN must use HTTPS in production');
+    if (frontendOrigins(parsed).some((origin) => new URL(origin).protocol !== 'https:')) {
+      throw new Error('All frontend origins must use HTTPS in production');
     }
     if (parsed.BETTER_AUTH_SECRET === PLACEHOLDER_SECRET) {
       throw new Error('BETTER_AUTH_SECRET must not use the documented placeholder in production');

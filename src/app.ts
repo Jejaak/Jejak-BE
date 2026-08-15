@@ -29,7 +29,7 @@ import type { AuthSessionProvider } from './types/auth.js';
 
 export interface AppDependencies {
   readonly config: {
-    readonly frontendOrigin: string;
+    readonly frontendOrigins: readonly string[];
     readonly trustProxyHops: number;
     readonly jsonBodyLimit: string;
     readonly apiRateLimitMax: number;
@@ -89,7 +89,7 @@ export function createApp(dependencies: AppDependencies) {
   app.use(
     cors({
       origin: (origin, callback) => {
-        callback(null, origin === undefined || origin === dependencies.config.frontendOrigin);
+        callback(null, origin === undefined || dependencies.config.frontendOrigins.includes(origin));
       },
       credentials: true,
       methods: ['GET', 'POST', 'OPTIONS'],
@@ -123,19 +123,19 @@ export function createApp(dependencies: AppDependencies) {
     authenticate(dependencies.auth),
     createPhishingRouter(
       phishingController,
-      exactMutationOrigin(dependencies.config.frontendOrigin),
+      exactMutationOrigin(dependencies.config.frontendOrigins),
     ),
     createPrivacySessionRouter(
       privacySessionController,
-      exactMutationOrigin(dependencies.config.frontendOrigin),
+      exactMutationOrigin(dependencies.config.frontendOrigins),
     ),
     createProgressRouter(
       progressController,
-      exactMutationOrigin(dependencies.config.frontendOrigin),
+      exactMutationOrigin(dependencies.config.frontendOrigins),
     ),
     createVirusSessionRouter(
       virusSessionController,
-      exactMutationOrigin(dependencies.config.frontendOrigin),
+      exactMutationOrigin(dependencies.config.frontendOrigins),
     ),
   );
   app.use(notFoundHandler);

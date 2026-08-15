@@ -28,7 +28,7 @@ export function attachVirusSessionGateway(input: {
   server: HttpServer;
   auth: AuthSessionProvider;
   service: VirusSessionService;
-  frontendOrigin: string;
+  frontendOrigins: readonly string[];
   now: () => Date;
 }): () => void {
   const websocketServer = new WebSocketServer({ noServer: true });
@@ -48,7 +48,7 @@ export function attachVirusSessionGateway(input: {
       const url = new URL(request.url ?? '/', 'http://localhost');
       const match = /^\/api\/v1\/ws\/virus-sessions\/(VRS-[A-F0-9]{6}-[A-F0-9]{6}-[A-F0-9]{4})$/u.exec(url.pathname);
       if (!match) return;
-      if (request.headers.origin !== input.frontendOrigin) return rejectUpgrade(socket, 403, 'Forbidden');
+      if (!input.frontendOrigins.includes(request.headers.origin ?? '')) return rejectUpgrade(socket, 403, 'Forbidden');
       const publicId = virusPublicIdSchema.parse(match[1]);
       const authSession = await input.auth.api.getSession({ headers: fromNodeHeaders(request.headers) });
       if (!authSession) return rejectUpgrade(socket, 401, 'Unauthorized');

@@ -34,7 +34,7 @@ export function attachPrivacySessionGateway(input: {
   server: HttpServer;
   auth: AuthSessionProvider;
   service: PrivacySessionService;
-  frontendOrigin: string;
+  frontendOrigins: readonly string[];
   now: () => Date;
 }): () => void {
   const websocketServer = new WebSocketServer({
@@ -63,7 +63,7 @@ export function attachPrivacySessionGateway(input: {
       if (!/^\/api\/v1\/ws\/privacy-sessions(?:\/|$)/u.test(url.pathname)) return;
       const match = /^\/api\/v1\/ws\/privacy-sessions\/(PRV-[A-F0-9]{6}-[A-F0-9]{6}-[A-F0-9]{4})$/u.exec(url.pathname);
       if (!match || url.search !== '') return rejectUpgrade(socket, 400, 'Bad Request');
-      if (request.headers.origin !== input.frontendOrigin) return rejectUpgrade(socket, 403, 'Forbidden');
+      if (!input.frontendOrigins.includes(request.headers.origin ?? '')) return rejectUpgrade(socket, 403, 'Forbidden');
       if (!request.headers.cookie) return rejectUpgrade(socket, 401, 'Unauthorized');
       const publicId = privacyPublicIdSchema.parse(match[1]);
       const authSession = await input.auth.api.getSession({ headers: fromNodeHeaders(request.headers) });

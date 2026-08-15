@@ -41,7 +41,7 @@ function send(socket: WebSocket, message: unknown): void {
 export function attachPhishingWebSocket(input: {
   readonly server: HttpServer;
   readonly auth: AuthSessionProvider;
-  readonly frontendOrigin: string;
+  readonly frontendOrigins: readonly string[];
   readonly repository: PhishingRepository;
   readonly service: PhishingService;
   readonly events: PhishingEvents;
@@ -150,7 +150,7 @@ export function attachPhishingWebSocket(input: {
       const url = new URL(request.url ?? '/', 'http://localhost');
       const match = /^\/api\/v1\/ws\/phishing-sessions\/([^/]+)$/u.exec(url.pathname);
       if (!match) return;
-      if (request.headers.origin !== input.frontendOrigin) {
+      if (!input.frontendOrigins.includes(request.headers.origin ?? '')) {
         reject(request, 403, 'Forbidden');
         return;
       }
