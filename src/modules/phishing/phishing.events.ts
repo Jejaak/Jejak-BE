@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 
-export interface PhishingRealtimePayload {
+interface PhishingAnswerPayload {
   readonly type: 'phishing.answer.saved' | 'phishing.session.completed' | 'phishing.session.lost';
   readonly sessionId: string;
   readonly questionId: string;
@@ -10,7 +10,7 @@ export interface PhishingRealtimePayload {
   readonly answeredCount: number;
   readonly score: number;
   readonly mistakes: number;
-  readonly status: 'ACTIVE' | 'COMPLETED' | 'LOST' | 'ABANDONED';
+  readonly status: 'ACTIVE' | 'COMPLETED' | 'LOST';
   readonly suspicious: boolean;
   readonly explanation: string;
   readonly clues: ReadonlyArray<{
@@ -19,6 +19,14 @@ export interface PhishingRealtimePayload {
     readonly text: string;
   }>;
 }
+
+interface PhishingAbandonedPayload {
+  readonly type: 'phishing.session.abandoned';
+  readonly sessionId: string;
+  readonly status: 'ABANDONED';
+}
+
+export type PhishingRealtimePayload = PhishingAnswerPayload | PhishingAbandonedPayload;
 
 interface PhishingRealtimeEnvelope {
   readonly publicId: string;

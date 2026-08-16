@@ -129,6 +129,7 @@ export function attachPhishingWebSocket(input: {
       const context = contexts.get(socket);
       if (socket.readyState === WebSocket.OPEN && context?.userId === event.userId && context.publicId === event.publicId) {
         socket.send(message);
+        if (event.payload.type === 'phishing.session.abandoned') socket.close(1000, 'Session abandoned');
       }
     }
   });

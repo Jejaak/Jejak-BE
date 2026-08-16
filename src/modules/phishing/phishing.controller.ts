@@ -36,6 +36,13 @@ export class PhishingController {
     res.status(200).json({ data: session });
   };
 
+  public readonly abandon: RequestHandler = async (req, res) => {
+    const publicId = phishingSessionIdSchema.parse(req.params.sessionId);
+    const abandoned = await this.service.abandon(userId(req), publicId, this.now());
+    if (!abandoned) throw new AppError(404, 'phishing_session_not_found', 'Active phishing session was not found.');
+    res.status(200).json({ data: { publicId, status: 'ABANDONED' } });
+  };
+
   public readonly answer: RequestHandler = async (req, res) => {
     const publicId = phishingSessionIdSchema.parse(req.params.sessionId);
     const input = createPhishingAnswerSchema.parse(req.body);

@@ -69,6 +69,18 @@ export class PhishingService {
     return session ? publicPhishingSession(session) : null;
   }
 
+  public async abandon(userId: string, publicId: string, now: Date): Promise<boolean> {
+    const abandoned = await this.repository.abandon(publicId, userId, now);
+    if (abandoned) {
+      this.events.publish({
+        publicId,
+        userId,
+        payload: { type: 'phishing.session.abandoned', sessionId: publicId, status: 'ABANDONED' },
+      });
+    }
+    return abandoned;
+  }
+
   public async answer(
     userId: string,
     publicId: string,
@@ -96,6 +108,9 @@ export class PhishingService {
       correct,
       answeredAt,
     });
+    if (saved.status === 'ABANDONED') {
+      throw new AppError(409, 'phishing_session_abandoned', 'Phishing session has been abandoned.');
+    }
     const payload = {
       type: saved.status === 'LOST'
         ? 'phishing.session.lost' as const

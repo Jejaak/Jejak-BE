@@ -75,6 +75,7 @@ export interface PhishingRepository {
   findSessionByPublicId(publicId: string, userId: string): Promise<PhishingSessionRecord | null>;
   findAnswerContext(publicId: string, userId: string, questionId: string): Promise<PhishingAnswerContext | null>;
   saveAnswer(input: SavePhishingAnswerData): Promise<SavedPhishingAnswer>;
+  abandon(publicId: string, userId: string, now: Date): Promise<boolean>;
 }
 
 const questionSelect = {
@@ -283,5 +284,13 @@ export class PrismaPhishingRepository implements PhishingRepository {
         completedAt: session.completedAt,
       };
     });
+  }
+
+  public async abandon(publicId: string, userId: string, now: Date): Promise<boolean> {
+    const result = await this.prisma.trPhishingSession.updateMany({
+      where: { publicId, userId, status: 'ACTIVE' },
+      data: { status: 'ABANDONED', completedAt: now, updatedAt: now },
+    });
+    return result.count > 0;
   }
 }

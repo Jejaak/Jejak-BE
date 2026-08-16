@@ -10,5 +10,6 @@ export function createPhishingRouter(
   router.post('/phishing-sessions', requireMutationOrigin, asyncHandler(controller.start));
   router.get('/phishing-sessions/:sessionId', asyncHandler(controller.get));
   router.post('/phishing-sessions/:sessionId/answers', requireMutationOrigin, asyncHandler(controller.answer));
+  router.post('/phishing-sessions/:sessionId/abandon', requireMutationOrigin, asyncHandler(controller.abandon));
   return router;
 }
