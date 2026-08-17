@@ -81,6 +81,7 @@ export function createApp(dependencies: AppDependencies) {
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'none'"],
+          connectSrc: ["'self'"],
           frameAncestors: ["'none'"],
           objectSrc: ["'none'"],
         },
