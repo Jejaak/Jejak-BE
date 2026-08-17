@@ -19,6 +19,7 @@ import { createPrivacySessionRouter } from './modules/privacy-session/privacy-se
 import { PrivacySessionService } from './modules/privacy-session/privacy-session.service.js';
 import { ProgressController } from './modules/progress/progress.controller.js';
 import type { ProgressRepository } from './modules/progress/progress.repository.js';
+import { createDocsRouter } from './docs/docs.routes.js';
 import { createProgressRouter } from './modules/progress/progress.routes.js';
 import { ProgressService } from './modules/progress/progress.service.js';
 import { VirusSessionController } from './modules/virus-session/virus-session.controller.js';
@@ -97,6 +98,7 @@ export function createApp(dependencies: AppDependencies) {
     }),
   );
   app.get('/healthz', (_req, res) => res.status(200).json({ status: 'ok' }));
+  app.use('/api/docs', createDocsRouter());
   app.all(
     '/api/auth/*splat',
     createRateLimit({

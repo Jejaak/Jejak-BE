@@ -30,6 +30,7 @@
     "express-rate-limit": "^8.6.2",
     "helmet": "^8.1.0",
     "pg": "^8.16.3",
+    "swagger-ui-dist": "^5.32.13",
     "ws": "^8.21.3",
     "zod": "^4.1.12"
   },
@@ -39,6 +40,7 @@
     "@types/express": "^5.0.5",
     "@types/node": "^24.10.0",
     "@types/pg": "^8.15.6",
+    "@types/swagger-ui-dist": "^3.30.6",
     "@types/ws": "^8.18.1",
     "eslint": "^9.39.1",
     "prisma": "^7.9.0",
