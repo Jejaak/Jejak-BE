@@ -30,8 +30,7 @@ export class VirusSessionController {
 
   public readonly abandon: RequestHandler = async (req, res) => {
     const sessionId = virusSessionIdSchema.parse(req.params.sessionId);
-    const abandoned = await this.service.abandon(userId(req), sessionId, this.now());
-    if (!abandoned) throw new AppError(404, 'virus_session_not_found', 'Active virus session not found.');
+    await this.service.abandon(userId(req), sessionId, this.now());
     res.status(204).end();
   };
 

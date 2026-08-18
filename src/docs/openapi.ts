@@ -74,7 +74,7 @@ export const openApiDocument = {
       post: { tags: ['Virus'], summary: 'Mengizinkan atau memblokir file', parameters: [{ $ref: '#/components/parameters/SessionUuid' }], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', additionalProperties: false, required: ['fileId', 'action'], properties: { fileId: { type: 'string', minLength: 1, maxLength: 64 }, action: { type: 'string', enum: ['ALLOW', 'BLOCK'] } } } } } }, responses: { '200': { description: 'Aksi file diproses' }, '404': { $ref: '#/components/responses/NotFound' } } },
     },
     '/api/v1/virus-sessions/{sessionId}/abandon': {
-      post: { tags: ['Virus'], summary: 'Mengakhiri sesi Virus', parameters: [{ $ref: '#/components/parameters/SessionUuid' }], responses: { '204': { description: 'Sesi diakhiri' }, '404': { $ref: '#/components/responses/NotFound' } } },
+      post: { tags: ['Virus'], summary: 'Mengakhiri sesi Virus', parameters: [{ $ref: '#/components/parameters/SessionUuid' }], responses: { '204': { description: 'Sesi sudah diakhiri atau sebelumnya telah berstatus terminal' } } },
     },
   },
   components: {
