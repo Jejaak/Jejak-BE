@@ -14,26 +14,26 @@ export const createProgressSchema = z.discriminatedUnion('mode', [
     .object({
       mode: z.literal('PRIVACY'),
       ...commonFields,
-      score: commonFields.score.max(15),
-      maxScore: z.literal(15),
-      mistakes: commonFields.mistakes.max(15),
+      score: commonFields.score.max(5),
+      maxScore: z.literal(5),
+      mistakes: commonFields.mistakes.max(5),
     })
     .strict(),
   z
     .object({
       mode: z.literal('PHISHING'),
       ...commonFields,
-      score: commonFields.score.max(15),
-      maxScore: z.literal(15),
-      mistakes: commonFields.mistakes.max(15),
+      score: commonFields.score.max(5),
+      maxScore: z.literal(5),
+      mistakes: commonFields.mistakes.max(5),
     })
     .strict(),
   z
     .object({
       mode: z.literal('DOWNLOADS'),
       ...commonFields,
-      score: commonFields.score.max(15),
-      maxScore: z.literal(15),
+      score: commonFields.score.max(5),
+      maxScore: z.literal(5),
       mistakes: commonFields.mistakes.max(3),
     })
     .strict(),

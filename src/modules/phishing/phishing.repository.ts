@@ -154,8 +154,8 @@ export class PrismaPhishingRepository implements PhishingRepository {
         where: { isActive: true },
         select: { id: true },
       });
-      const selected = shuffled(questions).slice(0, 15);
-      if (selected.length !== 15) throw new Error('Phishing master questions are incomplete.');
+      const selected = shuffled(questions).slice(0, 5);
+      if (selected.length !== 5) throw new Error('Phishing master questions are incomplete.');
       return transaction.trPhishingSession.create({
         data: {
           publicId: createPublicId(),
@@ -242,7 +242,7 @@ export class PrismaPhishingRepository implements PhishingRepository {
       const answeredCount = activeSession.answeredCount + 1;
       const score = activeSession.score + Number(input.correct);
       const mistakes = answeredCount - score;
-      const status: GameSessionStatus = mistakes >= 3 ? 'LOST' : answeredCount >= 15 ? 'COMPLETED' : 'ACTIVE';
+      const status: GameSessionStatus = mistakes >= 3 ? 'LOST' : answeredCount >= 5 ? 'COMPLETED' : 'ACTIVE';
       const terminal = status !== 'ACTIVE';
       const session = await transaction.trPhishingSession.update({
         where: { id: input.sessionId },
@@ -267,7 +267,7 @@ export class PrismaPhishingRepository implements PhishingRepository {
             idempotencyKey: `phishing-session:${activeSession.publicId}`,
             mode: 'PHISHING',
             score,
-            maxScore: 15,
+            maxScore: 5,
             mistakes,
             durationMs: Math.max(1, Math.min(86_400_000, input.answeredAt.getTime() - activeSession.startedAt.getTime())),
             completedAt: input.answeredAt,

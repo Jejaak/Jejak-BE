@@ -266,7 +266,7 @@ model TrGameSession {
   user             User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
   mode             GameMode
   status           GameSessionStatus          @default(ACTIVE)
-  questionCount    Int                        @default(15)
+  questionCount    Int                        @default(5)
   score            Int                        @default(0)
   mistakes         Int                        @default(0)
   startedAt        DateTime                   @default(now())

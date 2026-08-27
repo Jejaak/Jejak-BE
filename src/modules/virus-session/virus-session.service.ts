@@ -1,7 +1,7 @@
 import type { VirusFileAction, VirusSessionStatus } from '../../generated/prisma/client.js';
 import type { VirusSessionRecord, VirusSessionRepository } from './virus-session.repository.js';
 
-const safeTarget = 15;
+const safeTarget = 5;
 const maxMistakes = 3;
 
 function publicSession(session: VirusSessionRecord) {

@@ -1,7 +1,7 @@
 import { randomBytes, randomInt } from 'node:crypto';
 import { Prisma, type GameSessionStatus, type PrismaClient, type PrivacyChoice } from '../../generated/prisma/client.js';
 
-const questionCount = 15;
+const questionCount = 5;
 const maxTransactionAttempts = 3;
 const maxPublicIdAttempts = 3;
 
