@@ -95,6 +95,8 @@ const questionSelect = {
   clues: true,
 } as const;
 
+const firstPhishingQuestionId = 'reset-password-urgent';
+
 const sessionInclude = {
   sessionQuestions: {
     select: { position: true, question: { select: questionSelect } },
@@ -150,11 +152,16 @@ export class PrismaPhishingRepository implements PhishingRepository {
         });
       }
 
-      const questions = await transaction.msPhishingQuestion.findMany({
-        where: { isActive: true },
+      const firstQuestion = await transaction.msPhishingQuestion.findFirst({
+        where: { id: firstPhishingQuestionId, isActive: true, suspicious: true },
         select: { id: true },
       });
-      const selected = shuffled(questions).slice(0, 5);
+      if (!firstQuestion) throw new Error('The configured first phishing question is unavailable.');
+      const questions = await transaction.msPhishingQuestion.findMany({
+        where: { isActive: true, id: { not: firstQuestion.id } },
+        select: { id: true },
+      });
+      const selected = [firstQuestion, ...shuffled(questions).slice(0, 4)];
       if (selected.length !== 5) throw new Error('Phishing master questions are incomplete.');
       return transaction.trPhishingSession.create({
         data: {
